@@ -127,8 +127,11 @@ function dsp(t)
   let am7 = new Chord("min7", -3, 1);
   
   let noteLength = 2.0; //in seconds
-  let swell = (t / noteLength) % 1;  //between 0 and 1, decimal component of time in note length
-  let doubleSwell = (2*t / noteLength) % 1;  //between 0 and 1, decimal component of time in note length
+  let swellTime = (t / noteLength) % 1;  //between 0 and 1, decimal component of time in note length
+  let doubleSwellTime = (2*t / noteLength) % 1;  //between 0 and 1, decimal component of time in note length
+  
+  let swell = 0.5 * Math.sin((2 * Math.PI / noteLength) * swellTime);
+  let doubleSwell = doubleSwellTime < 0.95 ? (1.05263157895 * doubleSwellTime) : (-20 * doubleSwellTime + 20);
   
   //loops
   let melodyLoop = new Loop([0, 2, 4, 7, -1, 0], noteLength / 2);
@@ -138,7 +141,7 @@ function dsp(t)
   //instruments
   let melody = new Instrument([1.0, 0.5, 0.3, 0.2, 0.2, 0.1, 0.05, 0.05], 261.73);
   let pad = new Instrument([1.0, 0.5, 0.1], 261.73);
-  let bass = new Instrument([1.0, 0.0, 0.1, 0.0, 0.1, 0.0, 0.05, 0.0, 0.01], 261.73/2)
+  let bass = new Instrument([1.0, 0.0, 0.1, 0.0, 0.1, 0.0, 0.05, 0.0, 0.01], 261.73/2);
   
-  return clamp(swell, 0, 1) * (bass.playNote(bassLoop.getNote(t), t) + 0.5 * pad.playChord(chordLoop.getNote(t), t)) + clamp(doubleSwell, 0, 1) * melody.playNote(melodyLoop.getNote(t), t);
+  return swell * (bass.playNote(bassLoop.getNote(t), t) + 0.5 * pad.playChord(chordLoop.getNote(t), t)) + 0.55 * doubleSwell * melody.playNote(melodyLoop.getNote(t), t);
 }
